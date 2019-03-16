@@ -2,6 +2,12 @@
 import Location from 'data/Location';
 import React from "react";
 
+const __mapEl__ = document.createElement("div");
+__mapEl__.setAttribute("style", "width: 100%; height: 100%");
+
+let __map__;
+let __locationMarker__;
+let __markers__ = [];
 
 class Map extends React.Component {
 
@@ -9,43 +15,66 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
+
+        if (!__map__) {
+            __map__ = new google.maps.Map(__mapEl__, {
+                zoom: 8,
+                center: {lat: 0, lng: 0}
+            });
+        }
     }
 
     componentDidMount() {
-        this._map = new google.maps.Map(this.refs.mapContainer, {
-            zoom: 8,
-            center: {lat: 0, lng: 0}
-        });
-
-        this._locationMarker = null;
+        const mapContainer = this.refs.mapContainer;
+        if (mapContainer.children.length === 0) {
+            mapContainer.appendChild(__mapEl__);
+        }
     }
 
     /**
      * @param location {Location}
      */
     setCenter(location) {
-        this._map.setCenter({lat: location.getLatitude(), lng: location.getLongitude()});
+        __map__.setCenter({lat: location.getLatitude(), lng: location.getLongitude()});
     }
 
     /**
      * @param location {Location}
      */
     updateLocation(location) {
-        if (this._locationMarker) {
-            this._locationMarker.setMap(null);
+        if (__locationMarker__) {
+            __locationMarker__.setMap(null);
         }
 
-        this._locationMarker = new google.maps.Marker({
-            map: this._map,
+        __locationMarker__ = new google.maps.Marker({
+            map: __map__,
             position: {lat: location.getLatitude(), lng: location.getLongitude()},
             title: "You"
         });
     }
 
+    /**
+     * @param location {Location}
+     * @param name {String}
+     */
+    addMarker({location, name}) {
+        __markers__.push(
+            new google.maps.Marker({
+                map: __map__,
+                position: {lat: location.getLatitude(), lng: location.getLongitude()},
+                title: name
+            })
+        );
+    }
+
+    clearMarkers() {
+        __markers__.forEach((m) => m.setMap(null));
+        __markers__ = [];
+    }
+
     render() {
         return (
-            <div style={{width: "100%", height: "100%"}}>
-                <div ref="mapContainer"/>
+            <div ref="mapContainer" style={{width: "100%", height: "100%"}}>
             </div>
         );
     }

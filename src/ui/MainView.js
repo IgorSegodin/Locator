@@ -8,6 +8,21 @@ import Controls from 'ui/Controls';
 
 import Map from 'ui/Map';
 
+function PlaceList({places}) {
+    return (
+        <ul>
+            {places.map(p => {
+                return (
+                    <li>
+                        <span>{p.getName()}</span> ,
+                        <span style={{color: "gray"}}>{p.getAddress()}</span>
+                    </li>
+                );
+            })}
+        </ul>
+    );
+}
+
 class MainView extends React.Component {
 
     static propTypes = {
@@ -19,58 +34,85 @@ class MainView extends React.Component {
     constructor(props) {
         super(props);
 
-        this._location = null;
+        this.state = {
+            location: null,
+            places: null,
+            radius: 20000
+        }
     }
 
     componentDidMount() {
         const thisView = this;
         this.props.locationService.getLocation().then((location) => {
-            thisView._location = location;
+            thisView.setState({
+                ...thisView.state,
+                location: location
+            });
+
             thisView.centerMap();
             thisView.updateLocation();
         });
     }
 
     centerMap() {
-        this.refs.map.setCenter(this._location);
+        this.refs.map.setCenter(this.state.location);
     }
 
     updateLocation() {
-        this.refs.map.updateLocation(this._location);
+        this.refs.map.updateLocation(this.state.location);
     }
 
+    /**
+     * @param place {Place}
+     */
+    addMarker(place) {
+        this.refs.map.addMarker({location: place.getLocation(), name: place.getName()})
+    }
+
+    clearMarkers() {
+        this.refs.map.clearMarkers();
+    }
+
+    onSearch = (value) => {
+        const thisView = this;
+        thisView.props.placesService.findNearbyPlaces({searchString: value, center: this.state.location, radius: this.state.radius})
+            .then((data) => {
+                thisView.clearMarkers();
+
+                data.forEach((place) => {
+                    thisView.addMarker(place);
+                });
+
+                thisView.setState({
+                    ...thisView.state,
+                    places: data
+                });
+            });
+    };
+
     render() {
+        const height = `${Math.max(window.innerHeight, 300)}px`;
         return (
             <div>
-                <div style={{width: "300px", height: "100%", float: "left", backgroundColor: "#5b5b5b"}}>
+                <div style={{width: "300px", height: height, float: "left", backgroundColor: "#5b5b5b"}}>
                     <div style={{width: "calc(100% - 20px)", height: "calc(100% - 20px)", margin: "10px", backgroundColor: "white"}}>
-                        <Controls/>
+
+                        <Controls location={this.state.location}
+                                  places={this.state.places}
+                                  onSearch={this.onSearch}/>
+
+                        <div style={{height: "calc(100% - 30px)", overflow: "scroll"}}>
+                            {this.state.places && <PlaceList places={this.state.places}/>}
+                        </div>
+
                     </div>
                 </div>
-                <div style={{width: "calc(100% - 300px)", height: "100%", float: "right"}}>
+                <div style={{width: "calc(100% - 300px)", height: height, float: "right"}}>
                     <Map ref="map"/>
                 </div>
             </div>
         );
     }
 }
-
-/*
-
-placesService.findNearbyPlaces({query: "киев макдональдс", center: location, radius: 20000})
-                .then((data) => {
-                    data.forEach((place) => {
-                        const location = place.getLocation();
-                        console.log(place);
-
-                        new google.maps.Marker({
-                            map: map,
-                            position: {lat: location.getLatitude(), lng: location.getLongitude()},
-                            title: "Mc"
-                        });
-                    });
-                });
-
- */
 
 export default MainView;

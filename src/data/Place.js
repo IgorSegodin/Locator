@@ -4,10 +4,12 @@ class Place {
 
     /**
      * @param name {String}
+     * @param address {String}
      * @param location {Location}
      */
-    constructor({name, location}) {
+    constructor({name, address, location}) {
         this._name = name;
+        this._address = address;
         this._location = location;
     }
 
@@ -16,6 +18,13 @@ class Place {
      */
     getName() {
         return this._name;
+    }
+
+    /**
+     * @return {String}
+     */
+    getAddress() {
+        return this._address;
     }
 
     /**

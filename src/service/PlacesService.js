@@ -12,16 +12,17 @@ class PlacesService {
     }
 
     /**
-     * @param query {String}
+     * @param searchString {String}
      * @param center {Location}
      * @param radius {Number}
      * @return Promise<Array<Place>>
      */
-    findNearbyPlaces({query, center, radius}) {
+    findNearbyPlaces({searchString, center, radius}) {
         const localThis = this;
         const request = {
-            keyword: query,
-            fields: ['name', 'geometry'],
+            keyword: searchString,
+            // fields: ['name', 'geometry', 'formatted_address'],
+            // fields: "name, geometry",
             radius: radius,
             location: {
                 lat: center.getLatitude(),
@@ -35,8 +36,10 @@ class PlacesService {
                     resolve(
                         results.map((p) => {
                             const loc = p.geometry.location;
+
                             return new Place({
                                 name: p.name,
+                                address: p.vicinity,
                                 location: new Location({latitude: loc.lat(), longitude: loc.lng()})
                             })
                         })
