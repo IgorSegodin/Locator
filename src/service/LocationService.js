@@ -53,7 +53,7 @@ class LocationService {
         const x = (lngR2 - lngR1) * Math.cos((latR1 + latR2) / 2);
         const y = (latR2 - latR1);
 
-        return Math.sqrt(x * x + y * y) * EARTH_RADIUS_M;
+        return Math.round(Math.sqrt(x * x + y * y) * EARTH_RADIUS_M);
     }
 }
 

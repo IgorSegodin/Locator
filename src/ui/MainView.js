@@ -11,19 +11,28 @@ import Map from 'ui/Map';
 function PlaceList({places, onShowPlace, locationService, center}) {
     return (
         <ul>
-            {places.map(p => {
-                console.log(p.getAddress() + ": " + locationService.calcDistance({center, point: p.getLocation()}));
-                return (
-                    <li key={p.getAddress()}>
-                        <span>{p.getName()}</span>,
-                        <span style={{color: "gray"}}> {p.getAddress()}</span>
-                        <span style={{color: "blue", cursor: "pointer"}}
-                              onClick={() => {
-                                  onShowPlace(p);
-                              }}> view</span>
-                    </li>
-                );
-            })}
+            {
+                places.map(p => {
+                    return {
+                        place: p,
+                        distance: locationService.calcDistance({center, point: p.getLocation()}),
+                    }
+                }).sort((a, b) => {
+                    return a.distance === b.distance ? 0 : a.distance > b.distance ? 1 : -1;
+                }).map(data => {
+                    return (
+                        <li key={data.place.getAddress()}>
+                            <span>{data.place.getName()}</span>
+                            <span style={{color: "gray"}}> {data.place.getAddress()}</span>
+                            <span style={{color: "black"}}> {data.distance} m</span>
+                            <span style={{color: "blue", cursor: "pointer"}}
+                                  onClick={() => {
+                                      onShowPlace(data.place);
+                                  }}> view</span>
+                        </li>
+                    )
+                })
+            }
         </ul>
     );
 }
@@ -87,19 +96,21 @@ class MainView extends React.Component {
 
     onSearch = (value) => {
         const thisView = this;
-        thisView.props.placesService.findNearbyPlaces({searchString: value, center: this.state.location, radius: this.state.radius})
-            .then((data) => {
-                thisView.clearMarkers();
+        if (this.state.location) {
+            thisView.props.placesService.findNearbyPlaces({searchString: value, center: this.state.location, radius: this.state.radius})
+                .then((data) => {
+                    thisView.clearMarkers();
 
-                data.forEach((place) => {
-                    thisView.addMarker(place);
-                });
+                    data.forEach((place) => {
+                        thisView.addMarker(place);
+                    });
 
-                thisView.setState({
-                    ...thisView.state,
-                    places: data
+                    thisView.setState({
+                        ...thisView.state,
+                        places: data
+                    });
                 });
-            });
+        }
     };
 
     onShowPlace = (place) => {
