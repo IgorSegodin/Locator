@@ -6,7 +6,8 @@ class AbstractInput extends React.PureComponent {
     static propTypes = {
         name: PropTypes.string.isRequired,
         // value: PropTypes.any,
-        // onChange: PropTypes.func.isRequired,
+        onChange: PropTypes.func,
+        onKeyPress: PropTypes.func
     };
 
     constructor(props) {

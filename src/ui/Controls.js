@@ -20,7 +20,15 @@ class Controls extends React.Component {
 
     onSearch = () => {
         const value = this.refs.searchString.getValue();
-        this.props.onSearch(value);
+        if (value && value.trim().length > 3) {
+            this.props.onSearch(value);
+        }
+    };
+
+    onEnter = ({key}) => {
+        if (key === 'Enter') {
+            this.onSearch();
+        }
     };
 
     render() {
@@ -28,7 +36,7 @@ class Controls extends React.Component {
             <div>
                 <div>
                     <div style={{display: "inline-block", width: "calc(100% - 50px)", height: "30px"}}>
-                        <TextInput name="searchString" ref="searchString" placeholder="Search string ..."/>
+                        <TextInput name="searchString" ref="searchString" placeholder="Search string ..." onKeyPress={this.onEnter}/>
                     </div>
                     <div style={{display: "inline-block", float: "right", width: "50px", height: "30px"}}>
                         <button onClick={this.onSearch} style={{width: "100%", height: "100%"}}>Find places</button>

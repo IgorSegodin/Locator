@@ -15,6 +15,22 @@ class TextInput extends AbstractInput {
                 <input type="text"
                        ref="input"
                        name={this.props.name}
+                       onKeyPress={(e) => {
+                           if (this.props.onKeyPress) {
+                               this.props.onKeyPress({
+                                   name: this.props.name,
+                                   key: e.key
+                               });
+                           }
+                       }}
+                       onChange={(e) => {
+                           if (this.props.onChange) {
+                               this.props.onChange({
+                                   name: this.props.name,
+                                   value: e.target.value
+                               });
+                           }
+                       }}
                        style={{width: "100%", height: "100%"}}
                        placeholder={this.props.placeholder || ""}/>
             </div>
