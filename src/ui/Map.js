@@ -39,6 +39,13 @@ class Map extends React.Component {
     }
 
     /**
+     * @param zoom {Number}
+     */
+    setZoom(zoom) {
+        __map__.setZoom(zoom);
+    }
+
+    /**
      * @param location {Location}
      */
     updateLocation(location) {
@@ -79,5 +86,20 @@ class Map extends React.Component {
         );
     }
 }
+
+/*
+
+TODO map.fitBounds(bounds) after search.
+
+TODO map.setZoom(your desired zoom) on show place
+
+If you only have 1 marker and add it to the bounds, that results in the closest zoom possible:
+
+function addMarker(lat, lng, info) {
+  var pt = new google.maps.LatLng(lat, lng);
+  bounds.extend(pt);
+}
+
+ */
 
 export default Map;

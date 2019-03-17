@@ -8,14 +8,19 @@ import Controls from 'ui/Controls';
 
 import Map from 'ui/Map';
 
-function PlaceList({places}) {
+function PlaceList({places, onShowPlace, locationService, center}) {
     return (
         <ul>
             {places.map(p => {
+                console.log(p.getAddress() + ": " + locationService.calcDistance({center, point: p.getLocation()}));
                 return (
-                    <li>
-                        <span>{p.getName()}</span> ,
-                        <span style={{color: "gray"}}>{p.getAddress()}</span>
+                    <li key={p.getAddress()}>
+                        <span>{p.getName()}</span>,
+                        <span style={{color: "gray"}}> {p.getAddress()}</span>
+                        <span style={{color: "blue", cursor: "pointer"}}
+                              onClick={() => {
+                                  onShowPlace(p);
+                              }}> view</span>
                     </li>
                 );
             })}
@@ -49,13 +54,20 @@ class MainView extends React.Component {
                 location: location
             });
 
-            thisView.centerMap();
+            thisView.centerMap(this.state.location);
             thisView.updateLocation();
         });
     }
 
-    centerMap() {
-        this.refs.map.setCenter(this.state.location);
+    /**
+     * @param location {Location}
+     */
+    centerMap(location) {
+        this.refs.map.setCenter(location);
+    }
+
+    zoomMap(zoom) {
+        this.refs.map.setZoom(zoom);
     }
 
     updateLocation() {
@@ -90,6 +102,11 @@ class MainView extends React.Component {
             });
     };
 
+    onShowPlace = (place) => {
+        this.centerMap(place.getLocation());
+        this.zoomMap(15);
+    };
+
     render() {
         const height = `${Math.max(window.innerHeight, 300)}px`;
         return (
@@ -102,7 +119,12 @@ class MainView extends React.Component {
                                   onSearch={this.onSearch}/>
 
                         <div style={{height: "calc(100% - 30px)", overflow: "scroll"}}>
-                            {this.state.places && <PlaceList places={this.state.places}/>}
+                            {
+                                this.state.places && <PlaceList places={this.state.places}
+                                                                onShowPlace={this.onShowPlace}
+                                                                center={this.state.location}
+                                                                locationService={this.props.locationService}/>
+                            }
                         </div>
 
                     </div>
